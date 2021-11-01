@@ -25,8 +25,8 @@ services = {
                  },
     'metrics': {
         'method': 'POST',
-        'path': '/metrics',
-        'token': '',
+        'path': '/metrics/',
+        'token': 'Bearer SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c',
         'timeout': 6,
         'retry': 5,
         'cache-ttl': 0

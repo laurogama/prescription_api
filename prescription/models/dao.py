@@ -1,6 +1,6 @@
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import Column, Integer
+from sqlalchemy import Column, Integer, String
 
 db = SQLAlchemy()
 
@@ -16,7 +16,7 @@ class Prescription(db.Model):
     clinic_id = Column(Integer)
     physician_id = Column(Integer)
     patient_id = Column(Integer)
-    text = Column(Integer)
+    text = Column(String)
 
     def __init__(self, physician: int, patient: int, clinic: int, text: str):
         """Persists the prescription in a database"""
@@ -25,5 +25,13 @@ class Prescription(db.Model):
         self.physician_id = physician
         self.patient_id = patient
 
+    def save(self):
+        db.session.add(self)
+        db.session.flush()
+
+    def commit(self):
+        db.session.commit()
+
     def rollback(self):
-        self.remove()
+        db.session.delete(self)
+        db.session.commit()
