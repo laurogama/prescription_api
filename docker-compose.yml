@@ -5,7 +5,7 @@ services:
     command: python app.py run -h 0.0.0.0
     ports:
       - "5000:5000"
-      env_file: .env
+    env_file: .env.dev
     volumes:
       - .:/usr/src/app/
     depends_on:
@@ -17,7 +17,7 @@ services:
     environment:
       - POSTGRES_USER=iclinic
       - POSTGRES_PASSWORD=iclinic
-      - POSTGRES_DB=dev_iclinic
+      - POSTGRES_DB=iclinic_dev
 
 volumes:
   postgres_data:
