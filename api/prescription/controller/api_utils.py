@@ -9,7 +9,7 @@ def validate_json(raw_data: str) -> bool:
     """
     try:
         json.loads(raw_data)
-    except ValueError as err:
+    except ValueError:
         return False
     return True
 

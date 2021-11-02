@@ -8,7 +8,7 @@ import backoff as backoff
 import requests
 from requests import Response
 
-from prescription.controller.services import services
+from ..controller.services import services
 
 CLINICS = 'clinics'
 PATIENTS = 'patients'

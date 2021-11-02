@@ -2,11 +2,11 @@ import http
 
 from flask import request
 from flask_restful import Resource
-
-from prescription.controller.api_utils import validate_json, validate_schema
-from prescription.controller.controller import request_prescription_details, StatusCode
-from prescription.models.dao import Prescription
 from schema import Schema
+
+from ..controller.api_utils import validate_json, validate_schema
+from ..controller.controller import request_prescription_details, StatusCode
+from ..models.dao import Prescription
 
 
 class PrescriptionEndpoint(Resource):

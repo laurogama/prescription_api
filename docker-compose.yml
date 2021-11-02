@@ -1,13 +1,15 @@
 version: '3.8'
 services:
   web:
-    build: .
+    build:
+      context: ./api
+      dockerfile: Dockerfile
     command: python app.py run -h 0.0.0.0
     ports:
       - "5000:5000"
     env_file: .env.dev
     volumes:
-      - .:/usr/src/app/
+      - ./api/:/usr/src/app/
     depends_on:
       - db
   db:
