@@ -46,3 +46,4 @@ jobs:
       - name: Test with Coverage
         run: |
           coverage run
+          coverage report
