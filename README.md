@@ -1,6 +1,6 @@
 # Prescriptions API
 
-The api can be found on http://
+The api can be found on [https://gentle-harbor-62875.herokuapp.com](https://gentle-harbor-62875.herokuapp.com)
 
 ## Install
 
