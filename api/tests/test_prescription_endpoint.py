@@ -1,15 +1,25 @@
 import http
 import json
+import tempfile
 
 from flask_testing import TestCase
-from prescription import app
+from prescription import app, db
 from prescription.endpoints.prescription_endpoint import PrescriptionEndpoint
 from schema import Schema
 
 
 class TestPrescriptionEndpoint(TestCase):
+    def setUp(self):
+        db.create_all()
+
+    def tearDown(self):
+        db.session.remove()
+        db.drop_all()
+
     def create_app(self):
         app.config['TESTING'] = True
+        db_fd, db_path = tempfile.mkstemp()
+        app.config['DATABASE'] = db_path
         return app
 
     def test_get_schema(self):
