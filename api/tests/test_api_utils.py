@@ -1,8 +1,7 @@
 import unittest
 
+from prescription.controller.api_utils import validate_json, validate_schema
 from schema import Schema
-
-from ..controller.api_utils import validate_json, validate_schema
 
 
 class TestApiUtils(unittest.TestCase):

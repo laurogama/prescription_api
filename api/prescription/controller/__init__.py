@@ -1,0 +1,5 @@
+CLINICS = 'clinics'
+PATIENTS = 'patients'
+PHYSICIANS = 'physicians'
+PRESCRIPTION = 'prescription'
+RESPONSE_KEYS = [CLINICS, PATIENTS, PHYSICIANS]

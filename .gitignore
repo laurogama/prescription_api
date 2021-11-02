@@ -2,3 +2,5 @@
 .env.prod
 .coverage
 /api/htmlcov/
+/api/.pytest_cache/
+/.env.prod.db

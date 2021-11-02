@@ -22,11 +22,13 @@ class PrescriptionEndpoint(Resource):
         raw_data = request.get_data(as_text=True)
         # checks if payload is a valid json
         is_valid_request = validate_json(raw_data)
+        if not is_valid_request:
+            return {'error': {'message': StatusCode.MalformedRequest.message,
+                              'code': StatusCode.MalformedRequest.code}}, http.HTTPStatus.BAD_REQUEST
         request_data = request.get_json(force=True)
         # Checks if the json document is compliant with endpoint expected schema
         is_valid_schema = validate_schema(self.get_payload_schema, request_data)
-        if is_valid_request and is_valid_schema:
-            print('json payload is valid')
+        if is_valid_schema:
             prescription_model = Prescription(clinic=request_data['clinic']['id'],
                                               physician=request_data['physician']['id'],
                                               patient=request_data['patient']['id'], text=request_data['text'])
@@ -45,7 +47,6 @@ class PrescriptionEndpoint(Resource):
                 prescription_model.commit()
                 return {'data': response}, status
         else:
-            print('json payload is not valid')
             return {'error': {'message': StatusCode.MalformedRequest.message,
                               'code': StatusCode.MalformedRequest.code}}, http.HTTPStatus.BAD_REQUEST
 
