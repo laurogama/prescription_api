@@ -1,4 +1,5 @@
 # Prescriptions API
+
 ![example workflow](https://github.com/laurogama/prescription_api/actions/workflows/workflow.yml/badge.svg)
 
 The api can be found on [https://gentle-harbor-62875.herokuapp.com](https://gentle-harbor-62875.herokuapp.com)
@@ -9,7 +10,7 @@ The project requires
 
 * [Docker ](https://docs.docker.com/)
 * [Docker Compose ](https://docs.docker.com/compose/)
-* [Python 3.6+](https://www.python.org/)
+* [Python 3.7+](https://www.python.org/)
 
 ### Steps for development
 
@@ -22,13 +23,15 @@ The project requires
 
 ## Testing
 
-The unit tests can be executed with:
+The unit tests can be executed manually with:
 
     $ docker-compose -f docker-compose.yml exec web coverage run
 
 And the coverage report can be shown with:
 
     $  docker-compose -f docker-compose.yml exec web coverage report
+
+The tests are also executed by Github Actions CI on Push
 
 ## Running
 
