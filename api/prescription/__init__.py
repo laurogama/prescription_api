@@ -9,4 +9,4 @@ app.config.from_object("prescription.config.Config")
 db = init_db(app)
 api = Api(app)
 
-api.add_resource(PrescriptionEndpoint, '/prescriptions')
+api.add_resource(PrescriptionEndpoint, '/prescriptions', strict_slashes=False)
