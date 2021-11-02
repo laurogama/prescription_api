@@ -1,5 +1,5 @@
 # .coveragerc to control coverage.py
 [run]
-command_line = -m unittest
+command_line = -m pytest -v
 omit =
     */test*
