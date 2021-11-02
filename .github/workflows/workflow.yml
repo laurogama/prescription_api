@@ -7,6 +7,9 @@ on: [push]
 #    branches: ["main", "develop"]
 
 jobs:
+  defaults:
+    run:
+      working-directory: api
   build:
     runs-on: ubuntu-latest
     strategy:
