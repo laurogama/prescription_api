@@ -10,7 +10,7 @@ The project requires
 
 * [Docker ](https://docs.docker.com/)
 * [Docker Compose ](https://docs.docker.com/compose/)
-* [Python 3.6+](https://www.python.org/)
+* [Python 3.7+](https://www.python.org/)
 
 ### Steps for development
 
