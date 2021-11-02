@@ -34,7 +34,6 @@ class PrescriptionEndpoint(Resource):
             request_data['prescription_id'] = prescription_model.id
             prescription_details, status = request_prescription_details(request_data)
             if status > http.HTTPStatus.ACCEPTED:
-                print(status, prescription_details)
                 prescription_model.rollback()
                 return {'error': {'message': prescription_details['message'],
                                   'code': prescription_details['code']}}, status
@@ -44,7 +43,7 @@ class PrescriptionEndpoint(Resource):
                 response['id'] = prescription_model.id
                 del response['prescription_id']
                 prescription_model.commit()
-                return {'data': response}, http.HTTPStatus.OK
+                return {'data': response}, status
         else:
             print('json payload is not valid')
             return {'error': {'message': StatusCode.MalformedRequest.message,
