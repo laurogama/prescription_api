@@ -2,8 +2,9 @@
 
 ![example workflow](https://github.com/laurogama/prescription_api/actions/workflows/workflow.yml/badge.svg)
 
-The api can be found on [https://gentle-harbor-62875.herokuapp.com](https://gentle-harbor-62875.herokuapp.com)
+The API can be found on [https://gentle-harbor-62875.herokuapp.com](https://gentle-harbor-62875.herokuapp.com)
 
+The Api documentation can be found on [http://gentle-harbor-62875.herokuapp.com/api/docs/](http://gentle-harbor-62875.herokuapp.com/api/docs/)
 ## Install
 
 The project requires
