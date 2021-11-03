@@ -3,13 +3,15 @@ import http
 import json
 from enum import Enum
 
-import aiohttp
 import backoff as backoff
 import requests
+from aiohttp_client_cache import CachedSession, CacheBackend
 from requests import Response
 
-from . import PATIENTS, PHYSICIANS, RESPONSE_KEYS
+from . import CLINICS, PATIENTS, PHYSICIANS, RESPONSE_KEYS
 from ..controller.services import services
+
+HOUR = 3600  # seconds
 
 
 @backoff.on_exception(
@@ -18,10 +20,12 @@ from ..controller.services import services
     max_tries=services['patients']['retry'],
     giveup=lambda e: e.response is not None and e.response.status_code < 500
 )
-def call_patients(prescription, session):
-    return session.get(f"{services['patients']['path']}{prescription['patient']['id']}/",
-                       timeout=services['patients']['timeout'],
-                       headers={'Authorization': services['patients']['token']})
+async def call_patients(prescription):
+    async with CachedSession(
+            cache=CacheBackend('patients_cache', expire_after=services[PATIENTS]['cache-ttl'] * HOUR)) as session:
+        return await session.get(f"{services['host']}{services['patients']['path']}{prescription['patient']['id']}/",
+                                 timeout=services['patients']['timeout'],
+                                 headers={'Authorization': services['patients']['token']})
 
 
 @backoff.on_exception(
@@ -30,22 +34,27 @@ def call_patients(prescription, session):
     max_tries=services['physicians']['retry'],
     giveup=lambda e: e.response is not None and e.response.status_code < 500
 )
-def call_physicians(prescription, session):
-    return session.get(f"{services['physicians']['path']}{prescription['physician']['id']}/",
-                       timeout=services['physicians']['timeout'],
-                       headers={'Authorization': services['physicians']['token']})
+async def call_physicians(prescription):
+    async with CachedSession(
+            cache=CacheBackend('physicians_cache', expire_after=services[PHYSICIANS]['cache-ttl'] * HOUR)) as session:
+        return await session.get(f"{services['host']}{services[PHYSICIANS]['path']}{prescription['physician']['id']}/",
+                                 timeout=services[PHYSICIANS]['timeout'],
+                                 headers={'Authorization': services[PHYSICIANS]['token']})
 
 
 @backoff.on_exception(
     backoff.expo,
     requests.exceptions.RequestException,
-    max_tries=services['clinics']['retry'],
+    max_tries=services[CLINICS]['retry'],
     giveup=lambda e: e.response is not None and e.response.status_code < 500
 )
-def call_clinics(prescription, session):
-    url = f"{services['clinics']['path']}{prescription['clinic']['id']}/"
-    return session.get(url=url,
-                       timeout=services['clinics']['timeout'], headers={'Authorization': services['clinics']['token']})
+async def call_clinics(prescription):
+    async with CachedSession(
+            cache=CacheBackend('clinics_cache', expire_after=services[CLINICS]['cache-ttl'] * HOUR)) as session:
+        url = f"{services['host']}{services[CLINICS]['path']}{prescription['clinic']['id']}/"
+        return await session.get(url=url,
+                                 timeout=services[CLINICS]['timeout'],
+                                 headers={'Authorization': services[CLINICS]['token']})
 
 
 def request_prescription_details(prescription):
@@ -116,18 +125,17 @@ def send_metrics(clinics, patients, physicians, prescription):
 
 
 async def run_requests(prescription):
-    async with aiohttp.ClientSession(services['host']) as session:
-        clinics = await call_clinics(prescription, session)
-        patients = await call_patients(prescription, session)
-        physicians = await call_physicians(prescription, session)
-        response_dict = dict(zip(RESPONSE_KEYS, [clinics, patients, physicians]))
-        response, status = handle_service_response(response_dict)
-        if status is http.HTTPStatus.OK:
-            return send_metrics(await clinics.json(), await patients.json(),
-                                await physicians.json(),
-                                prescription['prescription_id'])
-        else:
-            return response, status
+    clinics = await call_clinics(prescription)
+    patients = await call_patients(prescription)
+    physicians = await call_physicians(prescription)
+    response_dict = dict(zip(RESPONSE_KEYS, [clinics, patients, physicians]))
+    response, status = handle_service_response(response_dict)
+    if status is http.HTTPStatus.OK:
+        return send_metrics(await clinics.json(), await patients.json(),
+                            await physicians.json(),
+                            prescription['prescription_id'])
+    else:
+        return response, status
 
 
 class StatusCode(Enum):
