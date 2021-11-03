@@ -14,6 +14,9 @@ class PrescriptionEndpoint(Resource):
     Prescription endpoint
     """
 
+    def __init__(self, **kwargs):
+        self.logger = kwargs.get('logger')
+
     def post(self):
         """
         POST method that receives a JSON object
@@ -29,6 +32,7 @@ class PrescriptionEndpoint(Resource):
         # Checks if the json document is compliant with endpoint expected schema
         is_valid_schema = validate_schema(self.get_payload_schema, request_data)
         if is_valid_schema:
+            self.logger.info(f"Request: {request_data}")
             prescription_model = Prescription(clinic=request_data['clinic']['id'],
                                               physician=request_data['physician']['id'],
                                               patient=request_data['patient']['id'], text=request_data['text'])
@@ -37,14 +41,17 @@ class PrescriptionEndpoint(Resource):
             prescription_details, status = request_prescription_details(request_data)
             if status > http.HTTPStatus.ACCEPTED:
                 prescription_model.rollback()
-                return {'error': {'message': prescription_details['message'],
-                                  'code': prescription_details['code']}}, status
+                error_response = {'error': {'message': prescription_details['message'],
+                                            'code': prescription_details['code']}}, status
+                self.logger.info(f"Request successful: {error_response}")
+                return error_response
             else:
                 response = request.get_json(force=True)
                 response['metric'] = prescription_details['metric']
                 response['id'] = prescription_model.id
                 del response['prescription_id']
                 prescription_model.commit()
+                self.logger.info(f"Request successful: {response}")
                 return {'data': response}, status
         else:
             return {'error': {'message': StatusCode.MalformedRequest.message,

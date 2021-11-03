@@ -66,6 +66,7 @@ async def call_clinics(prescription):
     """
     async with CachedSession(
             cache=CacheBackend('clinics_cache', expire_after=services[CLINICS]['cache-ttl'] * HOUR)) as session:
+        # In a real production environment this CacheBackend should be a RedisBackend
         url = f"{services['host']}{services[CLINICS]['path']}{prescription['clinic']['id']}/"
         return await session.get(url=url,
                                  timeout=services[CLINICS]['timeout'],
