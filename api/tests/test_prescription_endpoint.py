@@ -1,25 +1,43 @@
 import http
 import json
+import logging
+import os
 import tempfile
+from unittest import mock
 
+from flask import Flask
+from flask_restful import Api
+from flask_sqlalchemy import SQLAlchemy
 from flask_testing import TestCase
-from prescription import app, db
+from prescription import init_db
 from prescription.endpoints.prescription_endpoint import PrescriptionEndpoint
 from schema import Schema
 
 
+@mock.patch.dict(os.environ, {"DATABASE_URL": "sqlite://", })
 class TestPrescriptionEndpoint(TestCase):
+    db = SQLAlchemy()
+
     def setUp(self):
-        db.create_all()
+        self.db.create_all()
 
     def tearDown(self):
-        db.session.remove()
-        db.drop_all()
+        self.db.session.remove()
+        self.db.drop_all()
 
     def create_app(self):
+        app = Flask(__name__)
         app.config['TESTING'] = True
+        app.config['SQLALCHEMY_DATABASE_URI'] = "sqlite://"
+        app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
         db_fd, db_path = tempfile.mkstemp()
         app.config['DATABASE'] = db_path
+        self.db = init_db(app)
+        api = Api(app)
+
+        api.add_resource(PrescriptionEndpoint, '/prescriptions', strict_slashes=False, resource_class_kwargs={
+            'logger': logging.getLogger('prescription_logger')
+        })
         return app
 
     def test_get_schema(self):
