@@ -1,4 +1,3 @@
-# TODO import this from a json dockerized
 services = {
     'host': 'https://mock-api-challenge.dev.iclinic.com.br',
     'physicians': {

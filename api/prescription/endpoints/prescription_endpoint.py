@@ -52,4 +52,8 @@ class PrescriptionEndpoint(Resource):
 
     @property
     def get_payload_schema(self):
+        """
+        Creates a Schema to validate endpoint request body as a JSON document
+        :return:
+        """
         return Schema({"text": str, "clinic": {"id": int}, "patient": {"id": int}, "physician": {"id": int}})

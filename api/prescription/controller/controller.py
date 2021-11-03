@@ -21,6 +21,11 @@ HOUR = 3600  # seconds
     giveup=lambda e: e.response is not None and e.response.status_code < 500
 )
 async def call_patients(prescription):
+    """
+    Makes a GET request to Patients service
+    :param prescription: a dict containing info necessary for request
+    :return: The aiohttp response
+    """
     async with CachedSession(
             cache=CacheBackend('patients_cache', expire_after=services[PATIENTS]['cache-ttl'] * HOUR)) as session:
         return await session.get(f"{services['host']}{services['patients']['path']}{prescription['patient']['id']}/",
@@ -35,6 +40,11 @@ async def call_patients(prescription):
     giveup=lambda e: e.response is not None and e.response.status_code < 500
 )
 async def call_physicians(prescription):
+    """
+    Makes a GET request to Physician service
+    :param prescription: a dict containing info necessary for request
+    :return: The aiohttp response
+    """
     async with CachedSession(
             cache=CacheBackend('physicians_cache', expire_after=services[PHYSICIANS]['cache-ttl'] * HOUR)) as session:
         return await session.get(f"{services['host']}{services[PHYSICIANS]['path']}{prescription['physician']['id']}/",
@@ -49,6 +59,11 @@ async def call_physicians(prescription):
     giveup=lambda e: e.response is not None and e.response.status_code < 500
 )
 async def call_clinics(prescription):
+    """
+    Makes a GET request to Clinics service
+    :param prescription: a dict containing info necessary for request
+    :return: The aiohttp response
+    """
     async with CachedSession(
             cache=CacheBackend('clinics_cache', expire_after=services[CLINICS]['cache-ttl'] * HOUR)) as session:
         url = f"{services['host']}{services[CLINICS]['path']}{prescription['clinic']['id']}/"
@@ -58,10 +73,25 @@ async def call_clinics(prescription):
 
 
 def request_prescription_details(prescription):
+    """
+    Executes the asynchronous requests using a asyncio loop
+    :param prescription: the prescription id
+    :return: the response of the requests
+    """
     return asyncio.run(run_requests(prescription))
 
 
 def prepare_metrics_payload(clinic, patient, physician, prescription):
+    """
+
+    :param clinic: Dict containing information clinic information
+    :param patient: Dict containing information patient information
+    :param physician: Dict containing information physician information
+    :param prescription: the prescription id created by the API
+    :return: a JSON formatted string
+    """
+    if not clinic:
+        clinic = {'id': '', 'name': ''}
     payload_document = {'patient_id': patient['id'], 'patient_name': patient['name'],
                         'patient_phone': patient['phone'], 'patient_email': patient['email'],
                         'physician_id': physician['id'], 'physician_name': physician['name'],
@@ -71,6 +101,11 @@ def prepare_metrics_payload(clinic, patient, physician, prescription):
 
 
 def handle_service_response(response_dict):
+    """
+    Handles the response of dependent services of the prescription endpoint
+    :param response_dict: the dict with the aiohttp Response
+    :return: the dict with the error or success message
+    """
     if response_dict[PATIENTS].status == http.HTTPStatus.SERVICE_UNAVAILABLE:
         return {"message": StatusCode.PatientsServiceNotAvailable.message,
                 "code": StatusCode.PatientsServiceNotAvailable.code,
@@ -101,6 +136,11 @@ def handle_service_response(response_dict):
     giveup=lambda e: e.response is not None and e.response.status_code < 500
 )
 def call_metrics_server(payload) -> Response:
+    """
+    Requests a POST to metrics service
+    :param payload: the json body of the request
+    :return: a Requests Response object
+    """
     url = f"{services['host']}{services['metrics']['path']}"
     with requests.session() as session:
         return session.post(url, data=payload,
@@ -109,11 +149,24 @@ def call_metrics_server(payload) -> Response:
 
 
 def prepare_metrics_response(metrics_json):
+    """
+    Converts the metrics service response to the expected format
+    :param metrics_json: the body of the metrics service response
+    :return: a dict with metrics response id
+    """
     metrics = {"metric": {"id": metrics_json['id']}}
     return metrics
 
 
 def send_metrics(clinics, patients, physicians, prescription):
+    """
+    Sends a POST request to metrics service
+    :param clinics: Dict containing information clinic information
+    :param patients: Dict containing information patient information
+    :param physicians: Dict containing information physician information
+    :param prescription: the prescription id created by the API
+    :return: A dict containing the metrics service response or error code
+    """
     metrics_payload = prepare_metrics_payload(clinics, patients, physicians, prescription)
     metrics_response = call_metrics_server(metrics_payload)
     if not metrics_response:
@@ -125,6 +178,11 @@ def send_metrics(clinics, patients, physicians, prescription):
 
 
 async def run_requests(prescription):
+    """
+    Executes the service requests
+    :param prescription: dict containing the user request body
+    :return: the response of the API endpoint
+    """
     clinics = await call_clinics(prescription)
     patients = await call_patients(prescription)
     physicians = await call_physicians(prescription)
